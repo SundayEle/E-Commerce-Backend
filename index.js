@@ -9,5 +9,5 @@ databaseConnect();
 
 app.use("/api/v1/user", userRoutes);
 app.listen(environment.PORT, () => {
-  console.log(`App running on ${environment.PORT}`);
+  console.log(`App running on port ${environment.PORT}`);
 });

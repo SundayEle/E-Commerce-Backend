@@ -1,4 +1,5 @@
 const userModel = require("../model/userModel");
+const bcrypt = require("bcryptjs");
 
 const signUpUser = async (req, res) => {
   try {
@@ -26,13 +27,16 @@ const signUpUser = async (req, res) => {
       return res.status(400).json({ message: "Passwords do not match" });
     }
 
+    const salt = 10;
+    const hashedPassword = await bcrypt.hash(password, salt);
+
     const signingUserUp = await userModel.create({
       name,
       username,
       email,
       phoneNumber,
-      password,
-      confirmPassword,
+      password: hashedPassword,
+      confirmPassword: hashedPassword,
       role,
     });
 
@@ -48,4 +52,34 @@ const signUpUser = async (req, res) => {
   }
 };
 
-module.exports = signUpUser;
+const signInUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ message: "Please fill all the fields." });
+    }
+
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "invalid email or password" });
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res.status(404).json({ message: "invalid email or password" });
+    }
+
+    return res.status(200).json({
+      message: `Successfully logged in ${user.username}`,
+      data: user,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: "An error occurred while signing up",
+      data: error.message,
+    });
+  }
+};
+
+module.exports = { signUpUser, signInUser };
