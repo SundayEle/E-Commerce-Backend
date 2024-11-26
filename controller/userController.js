@@ -124,7 +124,7 @@ const getAllUsers = async (req, res) => {
   }
 };
 
-const deleteAuser = async (req, res) => {
+const deleteAUser = async (req, res) => {
   try {
     const user = await userModel.findByIdAndDelete(req.params.id);
 
@@ -146,10 +146,50 @@ const deleteAuser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const { name, username, email, phoneNumber, password, confirmPassword } =
+      req.body;
+
+    const salt = 10;
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const user = await userModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        name,
+        username,
+        email,
+        phoneNumber,
+        password: hashedPassword,
+        confirmPassword: hashedPassword,
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found!",
+      });
+    }
+
+    return res.status(201).json({
+      message: "User updated successfully!",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      message: "An error occurred!",
+      data: error.message,
+    });
+  }
+};
+
 module.exports = {
   signUpUser,
   signInUser,
   getOneUser,
   getAllUsers,
-  deleteAuser,
+  deleteAUser,
+  updateUser,
 };
