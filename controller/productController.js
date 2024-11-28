@@ -64,9 +64,7 @@ const getAllProducts = async (req, res) => {
 
 const getAProduct = async (req, res) => {
   try {
-    const product = await productModel
-      .findById(req.params.id)
-      .populate("productCategory");
+    const product = await productModel.findById(req.params.id);
 
     if (!product) {
       return res.status(404).json({
