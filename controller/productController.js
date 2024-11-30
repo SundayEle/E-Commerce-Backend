@@ -1,11 +1,19 @@
 const { default: mongoose } = require("mongoose");
 const productCategoryModel = require("../model/productCategoryModel");
 const productModel = require("../model/productModel");
+const userModel = require("../model/userModel");
 
 const createAProduct = async (req, res) => {
   try {
-    const { name, description, price, category: categoryId } = req.body;
+    const categoryId = req.params.categoryId;
 
+    const { name, description, price } = req.body;
+    const user = await userModel.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
     const productCategory = await productCategoryModel.findById(categoryId);
 
     if (!name || !description || !price || !categoryId) {
@@ -95,6 +103,12 @@ const deleteAProduct = async (req, res) => {
         message: "Product not found!",
       });
     }
+    const user = await userModel.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
     return res.status(200).json({
       message: `${product.name} successfully deleted!`,
@@ -111,6 +125,12 @@ const deleteAProduct = async (req, res) => {
 const updateAProduct = async (req, res) => {
   try {
     const { name, description, price, category } = req.body;
+    const user = await userModel.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
     const product = await productModel.findByIdAndUpdate(
       req.params.id,

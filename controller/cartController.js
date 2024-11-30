@@ -31,7 +31,6 @@ const addProductToCart = async (req, res) => {
 
     cart.totalQuantity += 1;
     cart.totalPrice += theProduct.price;
-
     await cart.save();
 
     return res.status(200).json({
