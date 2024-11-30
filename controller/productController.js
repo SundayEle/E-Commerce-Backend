@@ -13,7 +13,7 @@ const createAProduct = async (req, res) => {
     }
 
     if (!productCategory) {
-      return res.status(400).json({ message: "Category not found." });
+      return res.status(400).json({ message: "Category not found!" });
     }
 
     const creatingAProduct = await productModel.create({
@@ -64,7 +64,9 @@ const getAllProducts = async (req, res) => {
 
 const getAProduct = async (req, res) => {
   try {
-    const product = await productModel.findById(req.params.id);
+    const product = await productModel
+      .findById(req.params.id)
+      .populate({ path: "reviews", select: "comment user " });
 
     if (!product) {
       return res.status(404).json({

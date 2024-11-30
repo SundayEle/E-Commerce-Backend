@@ -4,10 +4,19 @@ const {
   removeProductFromCart,
   viewCart,
 } = require("../controller/cartController");
+const authenticatingJWT = require("../middleware/jwtDecode");
 const router = Router();
 
-router.route("/addProductToCart/:productId").post(addProductToCart);
-router.route("/removeProductFromCart/:productId").delete(removeProductFromCart);
-router.route("/viewCart").get(viewCart);
+router.post(
+  "/addProductToCart/:productId",
+  authenticatingJWT,
+  addProductToCart
+);
+router.delete(
+  "/removeProductFromCart/:productId",
+  authenticatingJWT,
+  removeProductFromCart
+);
+router.get("/viewCart", authenticatingJWT, viewCart);
 
 module.exports = router;

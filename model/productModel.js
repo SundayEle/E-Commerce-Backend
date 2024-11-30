@@ -30,7 +30,12 @@ const productSchema = new mongoose.Schema({
   },
   stock: {},
   rating: {},
-  reviews: {},
+  reviews: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "reviews",
+    },
+  ],
   createdAt: {},
   updatedAt: {},
 });
