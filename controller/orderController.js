@@ -57,4 +57,53 @@ const placeOrder = async (req, res) => {
   }
 };
 
-module.exports = placeOrder;
+const getOrders = async (req, res) => {
+  try {
+    const orders = await orderModel
+      .find({ user: req.user._id })
+      .populate("items.product", "name price");
+    return res.status(200).json({
+      message: "Orders retrieved successfully!",
+      data: orders,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occurred!",
+      data: error.message,
+    });
+  }
+};
+
+const updateOrderStatus = async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const { status } = req.body;
+    const order = await orderModel.findById(orderId);
+    if (!order) {
+      return res.status(404).json({
+        message: "Order not found!",
+      });
+    }
+    if (
+      !["Pending", "Processing", "Shipped", "Delivered", "Cancelled"].includes(
+        status
+      )
+    ) {
+      return res.status(400).json({ message: "Invalid status value." });
+    }
+    order.status = status;
+    await order.save();
+
+    return res.status(200).json({
+      message: "Order status updated successfully!",
+      data: order,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: "An error occurred!",
+      data: error.message,
+    });
+  }
+};
+
+module.exports = { placeOrder, getOrders, updateOrderStatus };

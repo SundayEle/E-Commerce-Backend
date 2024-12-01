@@ -8,27 +8,28 @@ const createACategory = async (req, res) => {
       return res.status(400).json({ message: "Name is required" });
     }
 
+    const existingCategory = await productCategoryModel.findOne({
+      name: name,
+    });
+
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category already exists!" });
+    }
+
     const newCategory = await productCategoryModel.create({
       name,
       description,
     });
-
-    const existingCategory = await productCategoryModel.findOne({
-      name: newCategory.name,
-    });
-
-    if (existingCategory) {
-      return res.status(404).send("Category already exist!");
-    }
 
     return res.status(201).json({
       message: `${newCategory.name} Category created successfully!`,
       data: newCategory,
     });
   } catch (error) {
-    return res.status(404).json({
-      message: "An error occurred!",
-      data: error.message,
+    console.error("Error creating category:", error.message);
+    return res.status(500).json({
+      message: "An error occurred while creating the category.",
+      error: error.message,
     });
   }
 };
