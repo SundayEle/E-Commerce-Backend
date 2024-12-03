@@ -27,6 +27,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     minLength: 8,
   },
+  notifications: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "notifications",
+    },
+  ],
   role: {
     type: String,
     enum: ["user", "vendor", "admin"],

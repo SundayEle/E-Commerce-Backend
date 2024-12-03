@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema(
         required: true,
       },
     },
+    address: {
+      type: String,
+      required: true,
+    },
     status: {
       type: String,
       required: true,

@@ -1,11 +1,24 @@
 const orderModel = require("../model/orderModel");
 const productModel = require("../model/productModel");
+const notificationModel = require("../model/notificationModel");
+const userModel = require("../model/userModel");
 
 const placeOrder = async (req, res) => {
   try {
-    const { items, paymentInfo } = req.body;
+    const { items, paymentInfo, address } = req.body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
+    const user = await userModel.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (
+      !items ||
+      !Array.isArray(items) ||
+      items.length === 0 ||
+      !address ||
+      !paymentInfo
+    ) {
       return res
         .status(400)
         .json({ message: "Items are required and must be an array." });
@@ -27,6 +40,13 @@ const placeOrder = async (req, res) => {
     let totalPrice = 0;
     const itemDetails = items.map((item) => {
       const product = products.find((p) => p._id.toString() === item.product);
+
+      if (product.stock < item.quantity) {
+        throw new Error(
+          `Insufficient stock for product: ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`
+        );
+      }
+
       totalPrice += product.price * item.quantity;
       return {
         product: item.product,
@@ -40,10 +60,34 @@ const placeOrder = async (req, res) => {
       items: itemDetails,
       totalPrice,
       paymentInfo,
+      address,
       status: "Pending",
     });
 
     await order.save();
+
+    await Promise.all(
+      items.map((item) =>
+        productModel.findByIdAndUpdate(item.product, {
+          $inc: { stock: -item.quantity },
+        })
+      )
+    );
+
+    const notification = new notificationModel({
+      userId: req.user._id,
+      title: "Order Placed",
+      message: `Your order #${order._id} has been placed successfully.`,
+      type: "order",
+    });
+
+    await notification.save();
+
+    await userModel.findByIdAndUpdate(
+      req.user._id,
+      { $push: { notifications: notification._id } },
+      { new: true }
+    );
 
     return res.status(201).json({
       message: "Order successfully placed!",

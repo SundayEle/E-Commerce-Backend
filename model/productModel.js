@@ -28,7 +28,10 @@ const productSchema = new mongoose.Schema({
     ref: "productCategory",
     required: true,
   },
-  stock: {},
+  stock: {
+    type: Number,
+    required: true,
+  },
   rating: {},
   reviews: [
     {

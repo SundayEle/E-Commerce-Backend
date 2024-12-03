@@ -5,23 +5,19 @@ const userModel = require("../model/userModel");
 
 const createAProduct = async (req, res) => {
   try {
-    const categoryId = req.params.categoryId;
-
-    const { name, description, price } = req.body;
+    const { name, description, price, category, stock } = req.body;
     const user = await userModel.findById(req.user._id);
     if (!user) {
       return res.status(404).json({
         message: "User not found",
       });
     }
-    const productCategory = await productCategoryModel.findById(categoryId);
+    const productCategory = await productCategoryModel.findOne({
+      _id: category,
+    });
 
-    if (!name || !description || !price || !categoryId) {
+    if (!name || !description || !price || !category || !stock) {
       return res.status(400).json({ message: "Please fill in all fields." });
-    }
-
-    if (!productCategory) {
-      return res.status(400).json({ message: "Category not found!" });
     }
 
     const creatingAProduct = await productModel.create({
@@ -29,7 +25,8 @@ const createAProduct = async (req, res) => {
       description,
       price,
       image: name.charAt(0),
-      category: productCategory._id,
+      category,
+      stock,
       createdAt: Date.now(),
     });
 
@@ -124,7 +121,7 @@ const deleteAProduct = async (req, res) => {
 
 const updateAProduct = async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, stock } = req.body;
     const user = await userModel.findById(req.user._id);
     if (!user) {
       return res.status(404).json({
@@ -139,6 +136,7 @@ const updateAProduct = async (req, res) => {
         description,
         price,
         category,
+        stock,
       },
       { new: true }
     );

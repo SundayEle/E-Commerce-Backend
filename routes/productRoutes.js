@@ -12,7 +12,7 @@ const { isVendorOrAdmin } = require("../middleware/protected");
 const router = Router();
 
 router.post(
-  "/createAProduct/:categoryId",
+  "/createAProduct",
   authenticatingJWT,
   isVendorOrAdmin,
   createAProduct
