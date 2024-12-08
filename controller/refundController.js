@@ -1,6 +1,7 @@
 const refundModel = require("../model/refundModel");
 const userModel = require("../model/userModel");
 const orderModel = require("../model/orderModel");
+const notificationModel = require("../model/notificationModel");
 
 const requestARefund = async (req, res) => {
   try {
@@ -24,7 +25,7 @@ const requestARefund = async (req, res) => {
         message: "You can't request a refund for this order",
       });
     }
-    if (existingOrder.amount < amount) {
+    if (existingOrder.totalPrice < amount) {
       return res.status(400).json({
         message: "Requested amount exceeds order amount",
       });
@@ -52,6 +53,22 @@ const requestARefund = async (req, res) => {
 
     existingOrder.status = "Cancelled";
     await existingOrder.save();
+
+    if (refund.user) {
+      const refundNotification = new notificationModel({
+        userId: refund.user._id,
+        title: "You requested for a refund",
+        message: "Refund requested!",
+        type: "refund",
+      });
+      await refundNotification.save();
+
+      await userModel.findByIdAndUpdate(
+        refund.user._id,
+        { $push: { notifications: refundNotification._id } },
+        { new: true }
+      );
+    }
 
     return res.status(201).json({
       message: "Refund requested successfully",
@@ -139,6 +156,22 @@ const updateRefundStatus = async (req, res) => {
       return res.status(404).json({
         message: "Refund not found",
       });
+    }
+
+    if (refund.user) {
+      const refundStatusUpdateNotification = new notificationModel({
+        userId: refund.user._id,
+        title: "Refund status update!",
+        message: "Refund status has been updated!",
+        type: "refund",
+      });
+      await refundStatusUpdateNotification.save();
+
+      await userModel.findByIdAndUpdate(
+        refund.user._id,
+        { $push: { notifications: refundStatusUpdateNotification._id } },
+        { new: true }
+      );
     }
 
     return res.status(200).json({

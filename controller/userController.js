@@ -92,7 +92,7 @@ const signInUser = async (req, res) => {
 
 const getOneUser = async (req, res) => {
   try {
-    const user = await userModel.findById(req.params.id);
+    const user = await userModel.findById(req.params.id).populate("products");
     if (!user) {
       return res.status(404).json({
         message: "User not found!",

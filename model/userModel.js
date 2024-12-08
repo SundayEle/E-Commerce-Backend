@@ -8,10 +8,12 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
+    unique: true,
   },
   email: {
     type: String,
     required: true,
+    unique: true,
   },
   phoneNumber: {
     type: Number,
@@ -27,6 +29,12 @@ const userSchema = new mongoose.Schema({
     required: true,
     minLength: 8,
   },
+  products: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Products",
+    },
+  ],
   notifications: [
     {
       type: mongoose.Schema.Types.ObjectId,

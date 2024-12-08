@@ -1,6 +1,7 @@
 const wishlistModel = require("../model/wishlistModel");
 const productModel = require("../model/productModel");
 const userModel = require("../model/userModel");
+const notificationModel = require("../model/notificationModel");
 
 const addWishlist = async (req, res) => {
   try {
@@ -29,6 +30,22 @@ const addWishlist = async (req, res) => {
     }
     wishlist.products.push(productId);
     await wishlist.save();
+
+    if (wishlist.user) {
+      const wishlistNotification = new notificationModel({
+        userId: wishlist.user._id,
+        title: "New product added to wishlist",
+        message: "Product added to wishlist successfully!",
+        type: "wishlist",
+      });
+      await wishlistNotification.save();
+
+      await userModel.findByIdAndUpdate(
+        wishlist.user._id,
+        { $push: { notifications: wishlistNotification._id } },
+        { new: true }
+      );
+    }
 
     return res.status(201).json({
       message: "Product added to wishlist",

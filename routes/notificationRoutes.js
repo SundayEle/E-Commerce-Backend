@@ -1,5 +1,8 @@
 const Router = require("express");
-const createANotification = require("../controller/notificationController");
+const {
+  createANotification,
+  markNotificationAsRead,
+} = require("../controller/notificationController");
 const { isAdmin } = require("../middleware/protected");
 const authenticatingJWT = require("../middleware/jwtDecode");
 
@@ -10,6 +13,12 @@ router.post(
   authenticatingJWT,
   isAdmin,
   createANotification
+);
+
+router.patch(
+  "/markNotificationAsRead/:notificationId",
+  authenticatingJWT,
+  markNotificationAsRead
 );
 
 module.exports = router;

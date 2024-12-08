@@ -16,7 +16,7 @@ router.route("/signUpUser").post(signUpUser);
 router.route("/signInUser").post(signInUser);
 router.route("/getOneUser/:id").get(getOneUser);
 router.get("/getAllUsers", authenticatingJWT, isAdmin, getAllUsers);
-router.delete("/deleteAUser", authenticatingJWT, deleteAUser);
-router.patch("/updateUser", authenticatingJWT, updateUser);
+router.delete("/deleteAUser/:id", authenticatingJWT, deleteAUser);
+router.patch("/updateUser/:id", authenticatingJWT, updateUser);
 
 module.exports = router;

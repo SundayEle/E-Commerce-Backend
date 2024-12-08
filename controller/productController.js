@@ -20,18 +20,30 @@ const createAProduct = async (req, res) => {
       return res.status(400).json({ message: "Please fill in all fields." });
     }
 
+    const existingProduct = await productModel.findOne({
+      name: name,
+      price: price,
+    });
+    if (existingProduct) {
+      return res.status(400).json({ message: "Product already exists" });
+    }
+
     const creatingAProduct = await productModel.create({
       name,
       description,
       price,
       image: name.charAt(0),
-      category,
+      category: category,
       stock,
+      user: user._id,
       createdAt: Date.now(),
     });
 
     productCategory.products.push(creatingAProduct._id);
     await productCategory.save();
+
+    user.products.push(creatingAProduct._id);
+    await user.save();
 
     return res.status(201).json({
       message: "Product created successfully",
@@ -48,6 +60,12 @@ const createAProduct = async (req, res) => {
 const getAllProducts = async (req, res) => {
   try {
     const allProducts = await productModel.find();
+    const user = await userModel.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
     if (!allProducts) {
       return res.status(404).json({
@@ -72,6 +90,13 @@ const getAProduct = async (req, res) => {
     const product = await productModel
       .findById(req.params.id)
       .populate({ path: "reviews", select: "comment user " });
+
+    const user = await userModel.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
 
     if (!product) {
       return res.status(404).json({

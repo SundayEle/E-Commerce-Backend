@@ -28,6 +28,10 @@ const productSchema = new mongoose.Schema({
     ref: "productCategory",
     required: true,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
   stock: {
     type: Number,
     required: true,

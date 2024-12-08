@@ -7,7 +7,7 @@ const {
   updateAProduct,
 } = require("../controller/productController");
 const authenticatingJWT = require("../middleware/jwtDecode");
-const { isVendorOrAdmin } = require("../middleware/protected");
+const { isVendorOrAdmin, isAdmin } = require("../middleware/protected");
 
 const router = Router();
 
@@ -17,8 +17,8 @@ router.post(
   isVendorOrAdmin,
   createAProduct
 );
-router.route("/getAllProducts").get(getAllProducts);
-router.route("/getAProduct/:id").get(getAProduct);
+router.get("/getAllProducts", authenticatingJWT, isAdmin, getAllProducts);
+router.get("/getAProduct/:id", authenticatingJWT, getAProduct);
 router.delete(
   "/deleteAProduct/:id",
   authenticatingJWT,

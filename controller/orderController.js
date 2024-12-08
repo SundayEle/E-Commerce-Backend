@@ -77,7 +77,7 @@ const placeOrder = async (req, res) => {
     const notification = new notificationModel({
       userId: req.user._id,
       title: "Order Placed",
-      message: `Your order #${order._id} has been placed successfully.`,
+      message: `Your order ${order._id} has been placed successfully.`,
       type: "order",
     });
 

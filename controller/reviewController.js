@@ -2,6 +2,7 @@ const productModel = require("../model/productModel");
 const reviewModel = require("../model/reviewModel");
 const userModel = require("../model/userModel");
 const { default: mongoose } = require("mongoose");
+const notificationModel = require("../model/notificationModel");
 
 const addReview = async (req, res) => {
   try {
@@ -50,6 +51,26 @@ const addReview = async (req, res) => {
     product.rating = avgRating;
     product.reviews.push(review._id);
     await product.save();
+
+    if (product.user) {
+      const Vendornotification = new notificationModel({
+        userId: product.user._id,
+        reviewId: product.reviews._id,
+        title: "New review on your product",
+        message: `Your product ${product.name} received a new review from ${
+          user.name || "a buyer"
+        }.`,
+        type: "review",
+      });
+      await Vendornotification.save();
+
+      await userModel.findByIdAndUpdate(
+        product.user._id,
+        product.reviews._id,
+        { $push: { notifications: Vendornotification._id } },
+        { new: true }
+      );
+    }
 
     return res.status(200).json({
       message: "Review added successfully",
