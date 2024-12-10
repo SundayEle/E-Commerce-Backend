@@ -2,6 +2,7 @@ const { default: mongoose } = require("mongoose");
 const productCategoryModel = require("../model/productCategoryModel");
 const productModel = require("../model/productModel");
 const userModel = require("../model/userModel");
+const cloudinary = require("../config/cloudinary");
 
 const createAProduct = async (req, res) => {
   try {
@@ -28,11 +29,13 @@ const createAProduct = async (req, res) => {
       return res.status(400).json({ message: "Product already exists" });
     }
 
+    const cloudImage = await cloudinary.uploader.upload(req.file.path);
+
     const creatingAProduct = await productModel.create({
       name,
       description,
       price,
-      image: name.charAt(0),
+      image: cloudImage.secure_url,
       category: category,
       tags: tags,
       stock,

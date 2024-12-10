@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const productImageUpload = require("../config/multer");
 const {
   createAProduct,
   getAllProducts,
@@ -16,6 +17,7 @@ router.post(
   "/createAProduct",
   authenticatingJWT,
   isVendorOrAdmin,
+  productImageUpload,
   createAProduct
 );
 router.get("/getAllProducts", authenticatingJWT, isAdmin, getAllProducts);

@@ -12,9 +12,12 @@ const orderRoutes = require("./routes/orderRoutes");
 const refundRoutes = require("./routes/refundRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
+const cors = require("cors");
 
 app.use(express.json());
 databaseConnect();
+
+app.use(cors());
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/product", productRoutes);
