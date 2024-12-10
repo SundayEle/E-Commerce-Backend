@@ -5,7 +5,7 @@ const userModel = require("../model/userModel");
 
 const createAProduct = async (req, res) => {
   try {
-    const { name, description, price, category, stock } = req.body;
+    const { name, description, price, category, stock, tags } = req.body;
     const user = await userModel.findById(req.user._id);
     if (!user) {
       return res.status(404).json({
@@ -34,6 +34,7 @@ const createAProduct = async (req, res) => {
       price,
       image: name.charAt(0),
       category: category,
+      tags: tags,
       stock,
       user: user._id,
       createdAt: Date.now(),
@@ -184,10 +185,63 @@ const updateAProduct = async (req, res) => {
   }
 };
 
+const searchProducts = async (req, res) => {
+  try {
+    const { query, minPrice, maxPrice, category, name, tags } = req.query;
+
+    if (!query && !minPrice && !maxPrice && !category && !name && !tags) {
+      return res
+        .status(400)
+        .json({ message: "At least one filter is required." });
+    }
+
+    let filters = {};
+
+    if (query) {
+      filters.$or = [
+        { name: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+        { tags: { $regex: query, $options: "i" } },
+      ];
+    }
+
+    if (minPrice)
+      filters.price = { ...filters.price, $gte: parseFloat(minPrice) };
+    if (maxPrice)
+      filters.price = { ...filters.price, $lte: parseFloat(maxPrice) };
+    if (category) filters.category = { $regex: category, $options: "i" };
+    if (name) filters.name = { $regex: name, $options: "i" };
+
+    if (tags) {
+      const tagArray = Array.isArray(tags) ? tags : tags.split(",");
+      filters.tags = { $in: tagArray.map((tag) => tag.trim()) };
+    }
+
+    const products = await productModel.find(filters);
+
+    if (!products || products.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No products found with the given filters." });
+    }
+
+    return res.status(200).json({
+      message: "Search results found!",
+      data: products,
+    });
+  } catch (error) {
+    console.error("Error in searchProducts:", error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while searching for products." });
+  }
+};
+
 module.exports = {
   createAProduct,
   getAllProducts,
   getAProduct,
   deleteAProduct,
   updateAProduct,
+  searchProducts,
 };

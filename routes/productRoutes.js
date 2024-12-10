@@ -5,6 +5,7 @@ const {
   getAProduct,
   deleteAProduct,
   updateAProduct,
+  searchProducts,
 } = require("../controller/productController");
 const authenticatingJWT = require("../middleware/jwtDecode");
 const { isVendorOrAdmin, isAdmin } = require("../middleware/protected");
@@ -31,5 +32,7 @@ router.patch(
   isVendorOrAdmin,
   updateAProduct
 );
+
+router.get("/searchProducts", searchProducts);
 
 module.exports = router;
